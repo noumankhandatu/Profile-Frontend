@@ -10,6 +10,7 @@ const ProtectedRoute = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/protect-route" element={<ProtectedRoutePage />} />
+
           <Route path="/logout" element={"finally logout"} />
         </Routes>
       </Router>
