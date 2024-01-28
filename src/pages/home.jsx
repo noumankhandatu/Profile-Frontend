@@ -1,39 +1,26 @@
-// Home.js
+import { useEffect } from "react";
 
-import { useEffect, useState } from "react";
 import Profile from "../components/Profile";
-import api from "../utils/auth";
-import Cookies from "universal-cookie";
+import { useGetAllAlertQuery } from "../redux/api";
 
 const Home = () => {
-  const cookies = new Cookies(null, { path: "/" });
-
-  const [stories, setStories] = useState([]);
-  const AppAccessToken = cookies.get("AppAccessToken");
+  const { data: stories, error, isLoading } = useGetAllAlertQuery();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await api.get("/newyork-stories", {
-          headers: {
-            Authorization: `Bearer ${AppAccessToken}`,
-          },
-        });
-        setStories("Great");
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    // Call the fetchData function
-    fetchData();
-  }, []);
+    if (error) {
+      console.error("Error fetching data:", error);
+    }
+  }, [error]);
 
   return (
     <div>
       <Profile />
-      <h2>New York Stories</h2>
-      <p style={{ fontSize: "100px" }}>{stories && stories}</p>
+      <h1>hello {error && "error"}</h1>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <p style={{ fontSize: "16px" }}>{stories && "hello world"}</p>
+      )}
     </div>
   );
 };
