@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "../pages/home";
 import Header from "../components/Layout/header";
-import ProtectedRoutePage from "../pages/ProtectedRoutePage";
 const ProtectedRoute = () => {
   return (
     <div>
@@ -9,8 +8,6 @@ const ProtectedRoute = () => {
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/protect-route" element={<ProtectedRoutePage />} />
-
           <Route path="/logout" element={"finally logout"} />
         </Routes>
       </Router>

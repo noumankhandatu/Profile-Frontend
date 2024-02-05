@@ -1,45 +1,39 @@
+import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import axios from "axios";
 import Cookies from "universal-cookie";
-const cookies = new Cookies(null, { path: "/" });
 
+const cookies = new Cookies(null, { path: "/" });
 const accessToken = cookies.get("AppAccessToken");
 const refreshToken = cookies.get("AppRefreshToken");
 
-const api = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
-  withCredentials: true,
+const baseQuery = fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_APP_API_URL,
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer ${accessToken}`,
   },
 });
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
-      try {
-        const newAccessToken = (
-          await api.get("/refresh-token", {
-            headers: { "x-refresh-token": refreshToken },
-          })
-        ).data.accessToken;
-        console.log(newAccessToken, "re");
-        cookies.set("AppAccessToken", newAccessToken, { path: "/" });
-        api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-        window.location.reload();
-        return api(originalRequest);
-      } catch (refreshError) {
-        handleTokenRefreshError();
-      }
+const AppURL = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+  if (result.error && result.error.status === 401) {
+    const refreshResult = await axios
+      .get(`${import.meta.env.VITE_APP_API_URL}/refresh-token`, {
+        headers: { "x-refresh-token": refreshToken },
+      })
+      .catch((err) => {
+        if (err.response.status && err) {
+          logoutUser();
+        }
+        console.log(err, "err");
+      });
+    if (refreshResult?.data?.accessToken) {
+      const newAccessToken = refreshResult.data.accessToken;
+      cookies.set("AppAccessToken", newAccessToken, { path: "/" });
+      window.location.reload();
     }
-    return Promise.reject(error);
   }
-);
-
-const handleTokenRefreshError = () => {
-  logoutUser();
+  return result;
 };
 
 const logoutUser = () => {
@@ -48,4 +42,4 @@ const logoutUser = () => {
   window.location.reload();
 };
 
-export default api;
+export default AppURL;

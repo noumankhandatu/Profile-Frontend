@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useGetAllAlertQuery } from "../redux/api";
+import { useGetAllAlertQuery, usePostTestingMutation } from "../redux/api";
 import Button from "@mui/material/Button";
 import flower from "../assets/flower.avif";
 const Home = () => {
   const { data, error, isLoading } = useGetAllAlertQuery();
+  const [postTesting] = usePostTestingMutation();
 
   useEffect(() => {
     if (error) {
@@ -14,6 +14,9 @@ const Home = () => {
   if (isLoading) return "Loading ...";
   if (error) return "Error with Rtk Query ...";
 
+  const handleTestBackend = async () => {
+    await postTesting();
+  };
   return (
     <div>
       {data && (
@@ -32,8 +35,8 @@ const Home = () => {
         }}
       >
         <img style={{ marginTop: 30 }} src={flower} alt="" width={"300px"} />
-        <Button sx={{ mt: 4 }} variant="contained" color="warning">
-          <Link to="/protected-route">Go to Protected Route</Link>
+        <Button onClick={handleTestBackend} sx={{ mt: 4 }} variant="contained" color="warning">
+          Test Backend
         </Button>
       </div>
     </div>
